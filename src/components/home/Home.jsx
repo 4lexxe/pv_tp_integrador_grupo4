@@ -7,7 +7,8 @@ import {
   CardMedia, 
   Button, 
   Checkbox,
-  CardActions
+  CardActions,
+  Chip
 } from '@mui/material';
 import { Favorite, FavoriteBorder, Visibility } from '@mui/icons-material';
 import { useFavoritos } from '../../context/FavoritosContext';
@@ -16,12 +17,54 @@ const Home = () => {
   const { toggleFavorito, esFavorito } = useFavoritos();
 
   const productos = [
-    { id: 1, nombre: "Producto 1", descripcion: "Descripción del producto 1", precio: "$99.99" },
-    { id: 2, nombre: "Producto 2", descripcion: "Descripción del producto 2", precio: "$149.99" },
-    { id: 3, nombre: "Producto 3", descripcion: "Descripción del producto 3", precio: "$79.99" },
-    { id: 4, nombre: "Producto 4", descripcion: "Descripción del producto 4", precio: "$199.99" },
-    { id: 5, nombre: "Producto 5", descripcion: "Descripción del producto 5", precio: "$129.99" },
-    { id: 6, nombre: "Producto 6", descripcion: "Descripción del producto 6", precio: "$89.99" }
+    { 
+      id: 1, 
+      nombre: "Smartphone Galaxy", 
+      descripcion: "Teléfono inteligente con pantalla AMOLED de 6.1 pulgadas", 
+      precio: "$899.99", 
+      categoria: "Electrónicos",
+      imagen: "https://via.placeholder.com/300x200/1976d2/ffffff?text=Smartphone"
+    },
+    { 
+      id: 2, 
+      nombre: "Laptop Gaming", 
+      descripcion: "Laptop para gaming con RTX 4060 y 16GB RAM", 
+      precio: "$1,499.99", 
+      categoria: "Computadoras",
+      imagen: "https://via.placeholder.com/300x200/dc004e/ffffff?text=Laptop"
+    },
+    { 
+      id: 3, 
+      nombre: "Auriculares Wireless", 
+      descripcion: "Auriculares inalámbricos con cancelación de ruido", 
+      precio: "$299.99", 
+      categoria: "Audio",
+      imagen: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Auriculares"
+    },
+    { 
+      id: 4, 
+      nombre: "Monitor 4K", 
+      descripcion: "Monitor Ultra HD de 27 pulgadas para profesionales", 
+      precio: "$649.99", 
+      categoria: "Periféricos",
+      imagen: "https://via.placeholder.com/300x200/ff9800/ffffff?text=Monitor"
+    },
+    { 
+      id: 5, 
+      nombre: "Tablet Pro", 
+      descripcion: "Tablet profesional con stylus incluido y 256GB", 
+      precio: "$799.99", 
+      categoria: "Tablets",
+      imagen: "https://via.placeholder.com/300x200/9c27b0/ffffff?text=Tablet"
+    },
+    { 
+      id: 6, 
+      nombre: "Cámara DSLR", 
+      descripcion: "Cámara profesional de 24MP con lente 18-55mm", 
+      precio: "$1,199.99", 
+      categoria: "Fotografía",
+      imagen: "https://via.placeholder.com/300x200/795548/ffffff?text=Cámara"
+    }
   ];
 
   return (
@@ -37,7 +80,7 @@ const Home = () => {
         maxWidth: 1200,
         margin: '0 auto'
       }}>
-        {productos.map(({ id, nombre, descripcion, precio }) => (
+        {productos.map(({ id, nombre, descripcion, precio, categoria, imagen }) => (
           <Card key={id} sx={{ 
             display: 'flex',
             flexDirection: 'column',
@@ -47,7 +90,7 @@ const Home = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image="https://via.placeholder.com/300x200"
+                image={imagen}
                 alt={nombre}
               />
               <Checkbox
@@ -65,9 +108,25 @@ const Home = () => {
                   borderRadius: '50%'
                 }}
               />
+              <Chip
+                label={`ID: ${id}`}
+                size="small"
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 8,
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  color: 'white'
+                }}
+              />
             </Box>
             <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" gutterBottom>{nombre}</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
+                  {nombre}
+                </Typography>
+                <Chip label={categoria} size="small" color="primary" />
+              </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {descripcion}
               </Typography>
@@ -79,7 +138,7 @@ const Home = () => {
               <Button
                 variant="outlined"
                 startIcon={<Visibility />}
-                onClick={() => alert(`Ver detalles de: ${nombre}`)}
+                onClick={() => alert(`Ver detalles de: ${nombre} (ID: ${id})`)}
                 fullWidth
               >
                 Ver más detalles
