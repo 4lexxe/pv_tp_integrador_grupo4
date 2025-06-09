@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Box, 
   Typography, 
@@ -10,9 +10,10 @@ import {
   CardActions
 } from '@mui/material';
 import { Favorite, FavoriteBorder, Visibility } from '@mui/icons-material';
+import { useFavoritos } from '../../context/FavoritosContext';
 
 const Home = () => {
-  const [favoritos, setFavoritos] = useState(new Set());
+  const { toggleFavorito, esFavorito } = useFavoritos();
 
   const productos = [
     { id: 1, nombre: "Producto 1", descripcion: "Descripción del producto 1", precio: "$99.99" },
@@ -22,14 +23,6 @@ const Home = () => {
     { id: 5, nombre: "Producto 5", descripcion: "Descripción del producto 5", precio: "$129.99" },
     { id: 6, nombre: "Producto 6", descripcion: "Descripción del producto 6", precio: "$89.99" }
   ];
-
-  const toggleFavorito = (id) => {
-    setFavoritos(prev => {
-      const nuevos = new Set(prev);
-      nuevos.has(id) ? nuevos.delete(id) : nuevos.add(id);
-      return nuevos;
-    });
-  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -60,7 +53,7 @@ const Home = () => {
               <Checkbox
                 icon={<FavoriteBorder />}
                 checkedIcon={<Favorite />}
-                checked={favoritos.has(id)}
+                checked={esFavorito(id)}
                 onChange={() => toggleFavorito(id)}
                 sx={{
                   position: 'absolute',
