@@ -1,7 +1,19 @@
-import React from 'react';
-import { Box, Typography, Card, CardContent, CardMedia } from '@mui/material';
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Card, 
+  CardContent, 
+  CardMedia, 
+  Button, 
+  Checkbox,
+  CardActions
+} from '@mui/material';
+import { Favorite, FavoriteBorder, Visibility } from '@mui/icons-material';
 
 const Home = () => {
+  const [favoritos, setFavoritos] = useState(new Set());
+
   const productos = [
     { id: 1, nombre: "Producto 1", descripcion: "Descripción del producto 1", precio: "$99.99" },
     { id: 2, nombre: "Producto 2", descripcion: "Descripción del producto 2", precio: "$149.99" },
@@ -10,6 +22,14 @@ const Home = () => {
     { id: 5, nombre: "Producto 5", descripcion: "Descripción del producto 5", precio: "$129.99" },
     { id: 6, nombre: "Producto 6", descripcion: "Descripción del producto 6", precio: "$89.99" }
   ];
+
+  const toggleFavorito = (id) => {
+    setFavoritos(prev => {
+      const nuevos = new Set(prev);
+      nuevos.has(id) ? nuevos.delete(id) : nuevos.add(id);
+      return nuevos;
+    });
+  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -26,17 +46,33 @@ const Home = () => {
       }}>
         {productos.map(({ id, nombre, descripcion, precio }) => (
           <Card key={id} sx={{ 
-            height: '100%',
             display: 'flex',
             flexDirection: 'column',
             '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 }
           }}>
-            <CardMedia
-              component="img"
-              height="200"
-              image="https://via.placeholder.com/300x200"
-              alt={nombre}
-            />
+            <Box sx={{ position: 'relative' }}>
+              <CardMedia
+                component="img"
+                height="200"
+                image="https://via.placeholder.com/300x200"
+                alt={nombre}
+              />
+              <Checkbox
+                icon={<FavoriteBorder />}
+                checkedIcon={<Favorite />}
+                checked={favoritos.has(id)}
+                onChange={() => toggleFavorito(id)}
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  color: 'white',
+                  '&.Mui-checked': { color: 'red' },
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  borderRadius: '50%'
+                }}
+              />
+            </Box>
             <CardContent sx={{ flexGrow: 1 }}>
               <Typography variant="h6" gutterBottom>{nombre}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -46,6 +82,16 @@ const Home = () => {
                 {precio}
               </Typography>
             </CardContent>
+            <CardActions sx={{ p: 2, pt: 0 }}>
+              <Button
+                variant="outlined"
+                startIcon={<Visibility />}
+                onClick={() => alert(`Ver detalles de: ${nombre}`)}
+                fullWidth
+              >
+                Ver más detalles
+              </Button>
+            </CardActions>
           </Card>
         ))}
       </Box>
