@@ -5,6 +5,15 @@ export const generatePlaceholderImage = (nombre) => {
   return `https://via.placeholder.com/300x200/${randomColor}/ffffff?text=${text}`;
 };
 
+export const getImageFallback = (type = 'product') => {
+  const fallbacks = {
+    product: 'https://via.placeholder.com/300x200/e0e0e0/757575?text=Sin+Imagen',
+    preview: 'https://via.placeholder.com/300x200/cccccc/666666?text=Error+al+cargar',
+    avatar: 'https://via.placeholder.com/100x100/e0e0e0/757575?text=👤'
+  };
+  return fallbacks[type] || fallbacks.product;
+};
+
 export const categoriasConfig = {
   opciones: [
     'Electrónicos',

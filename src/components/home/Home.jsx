@@ -3,6 +3,7 @@ import { Box, Typography, Card, CardContent, CardMedia, Button, Checkbox, CardAc
 import { Favorite, FavoriteBorder, Visibility, Add } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const Home = () => {
   const { toggleFavorito, esFavorito, cantidadFavoritos } = useFavoritos();
@@ -46,7 +47,11 @@ const Home = () => {
             '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 }
           }}>
             <Box sx={{ position: 'relative' }}>
-              <CardMedia component="img" height="200" image={imagen} alt={nombre} />
+              <OptimizedImage
+                src={imagen}
+                alt={nombre}
+                height={200}
+              />
               
               <Checkbox
                 icon={<FavoriteBorder />}

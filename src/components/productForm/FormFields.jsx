@@ -12,6 +12,7 @@ import {
   Button,
   Card
 } from '@mui/material';
+import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const FormFields = ({ formData, errors, onChange, onGenerateImage, categorias }) => {
   const formatPrecioDisplay = (precio) => {
@@ -133,13 +134,11 @@ const FormFields = ({ formData, errors, onChange, onGenerateImage, categorias })
         <Grid item xs={12}>
           <Typography variant="h6" gutterBottom>Vista previa:</Typography>
           <Card sx={{ maxWidth: 300 }}>
-            <img
+            <OptimizedImage
               src={formData.imagen}
               alt="Vista previa"
-              style={{ width: '100%', height: 200, objectFit: 'cover' }}
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/300x200/cccccc/666666?text=Error+al+cargar';
-              }}
+              height={200}
+              fallbackSrc="https://via.placeholder.com/300x200/cccccc/666666?text=Error+al+cargar"
             />
           </Card>
         </Grid>

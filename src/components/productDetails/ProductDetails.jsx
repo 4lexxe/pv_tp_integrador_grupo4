@@ -5,7 +5,6 @@ import {
   Typography, 
   Card, 
   CardContent, 
-  CardMedia, 
   Button, 
   Chip, 
   Container,
@@ -22,6 +21,7 @@ import {
   Edit
 } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
+import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -88,11 +88,10 @@ const ProductDetails = () => {
         {/* Imagen del producto */}
         <Grid item xs={12} md={6}>
           <Card sx={{ position: 'relative' }}>
-            <CardMedia
-              component="img"
-              image={producto.imagen}
+            <OptimizedImage
+              src={producto.imagen}
               alt={producto.nombre}
-              sx={{ height: 400, objectFit: 'cover' }}
+              height={400}
             />
             
             {/* Badge de favorito */}

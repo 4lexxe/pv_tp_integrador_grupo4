@@ -3,6 +3,7 @@ import { Box, Typography, Card, CardContent, CardMedia, Button, CardActions, Chi
 import { Favorite, Visibility, Delete, ShoppingBag } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useProductos, useFavoritos } from '../../context/AppContext';
+import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const Favoritos = () => {
   const { obtenerProductoPorId } = useProductos();
@@ -56,7 +57,11 @@ const Favoritos = () => {
                 '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 }
               }}>
                 <Box sx={{ position: 'relative' }}>
-                  <CardMedia component="img" height="200" image={producto.imagen} alt={producto.nombre} />
+                  <OptimizedImage
+                    src={producto.imagen}
+                    alt={producto.nombre}
+                    height={200}
+                  />
                   
                   <Chip
                     icon={<Favorite />}
