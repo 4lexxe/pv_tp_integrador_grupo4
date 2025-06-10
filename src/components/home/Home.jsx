@@ -2,10 +2,12 @@ import React from 'react';
 import { Box, Typography, Card, CardContent, CardMedia, Button, Checkbox, CardActions, Chip, Container } from '@mui/material';
 import { Favorite, FavoriteBorder, Visibility } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const { toggleFavorito, esFavorito, cantidadFavoritos } = useFavoritos();
   const { obtenerProductos } = useProductos();
+  const navigate = useNavigate();
   const productos = obtenerProductos();
 
   return (
@@ -83,7 +85,7 @@ const Home = () => {
               <Button
                 variant="contained"
                 startIcon={<Visibility />}
-                onClick={() => alert(`Ver detalles de: ${nombre} (ID: ${id})`)}
+                onClick={() => navigate(`/producto/${id}`)}
                 fullWidth
               >
                 Ver Detalles

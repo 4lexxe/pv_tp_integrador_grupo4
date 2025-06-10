@@ -13,6 +13,23 @@ const Layout = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  // Función para obtener el nombre de la página actual
+  const getCurrentPageName = () => {
+    if (location.pathname.startsWith('/producto/')) {
+      return 'Detalle del Producto';
+    }
+    switch (location.pathname) {
+      case '/':
+        return 'Inicio';
+      case '/favoritos':
+        return 'Favoritos';
+      case '/configuracion':
+        return 'Configuración';
+      default:
+        return 'Página';
+    }
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="static">

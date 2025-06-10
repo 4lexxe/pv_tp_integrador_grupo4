@@ -98,7 +98,7 @@ const Favoritos = () => {
                   <Button
                     variant="contained"
                     startIcon={<Visibility />}
-                    onClick={() => alert(`Ver detalles de: ${producto.nombre}`)}
+                    onClick={() => navigate(`/producto/${producto.id}`)}
                     fullWidth
                   >
                     Ver Detalles
