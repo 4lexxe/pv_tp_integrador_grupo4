@@ -1,191 +1,102 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage.jsx';
-import { STORAGE_KEYS, APP_CONFIG, MENSAJES } from '../utils/constants.jsx';
-
-//----------------------------
-// CONTEXT API PARA FAVORITOS MEJORADO
-//----------------------------
+import { useCrossTabSync } from '../hooks/useCrossTabSync.jsx';
+import { STORAGE_KEYS, APP_CONFIG } from '../utils/constants.jsx';
 
 const FavoritosContext = createContext();
 
-/**
- * Hook personalizado para usar el contexto de favoritos
- * Valida que el hook se use dentro del FavoritosProvider
- */
 export const useFavoritos = () => {
   const context = useContext(FavoritosContext);
-  if (!context) {
-    throw new Error('useFavoritos debe ser usado dentro de FavoritosProvider');
-  }
+  if (!context) throw new Error('useFavoritos debe usarse dentro de FavoritosProvider');
   return context;
 };
 
-/**
- * Provider del contexto de favoritos con persistencia
- * Maneja el estado global de productos favoritos del usuario
- */
 export const FavoritosProvider = ({ children }) => {
-  //----------------------------
-  // ESTADO PERSISTENTE
-  //----------------------------
-  
-  // Usar localStorage para persistir favoritos
   const [favoritosArray, setFavoritosArray, removeFavoritosArray] = useLocalStorage(STORAGE_KEYS.FAVORITOS, []);
-  
-  // Convertir array a Set para mejor rendimiento
   const [favoritos, setFavoritos] = useState(() => new Set(favoritosArray));
+  const isUpdating = useRef(false);
 
-  // Sincronizar con localStorage cuando cambie favoritos
   useEffect(() => {
-    setFavoritosArray([...favoritos]);
-  }, [favoritos, setFavoritosArray]);
-
-  //----------------------------
-  // FUNCIONES DEL CONTEXTO
-  //----------------------------
-
-  // Alterna el estado de favorito de un producto con validaciones
-  const toggleFavorito = (productoId, notificar = true) => {
-    setFavoritos(prev => {
-      const nuevos = new Set(prev);
-      const yaEsFavorito = nuevos.has(productoId);
-      
-      if (yaEsFavorito) {
-        nuevos.delete(productoId);
-        if (notificar) {
-          // Aquí podrías usar el hook de notificaciones
-          console.log(MENSAJES.FAVORITO_REMOVIDO);
-        }
-      } else {
-        // Validar límite máximo de favoritos
-        if (nuevos.size >= APP_CONFIG.MAX_FAVORITOS) {
-          console.warn(`Máximo ${APP_CONFIG.MAX_FAVORITOS} favoritos permitidos`);
-          return prev;
-        }
-        nuevos.add(productoId);
-        if (notificar) {
-          console.log(MENSAJES.FAVORITO_AGREGADO);
-        }
+    if (!isUpdating.current) {
+      const newArray = [...favoritos];
+      if (JSON.stringify(newArray) !== JSON.stringify(favoritosArray)) {
+        setFavoritosArray(newArray);
       }
-      
-      return nuevos;
-    });
-  };
+    }
+    isUpdating.current = false;
+  }, [favoritos]);
 
-  // Verifica si un producto está marcado como favorito
-  const esFavorito = (productoId) => favoritos.has(productoId);
+  const handleMessage = useCallback((message) => {
+    if (message.type === 'FAVORITOS_UPDATE' || 
+        (message.type === 'STORAGE_UPDATE' && message.key === STORAGE_KEYS.FAVORITOS)) {
+      isUpdating.current = true;
+      setFavoritos(new Set(message.favoritos || message.data));
+    }
+  }, []);
 
-  // Obtiene todos los IDs de productos favoritos como array
-  const obtenerFavoritos = () => Array.from(favoritos);
+  const { sendMessage } = useCrossTabSync('favoritos-sync', handleMessage);
 
-  // Obtiene la cantidad total de productos favoritos
-  const cantidadFavoritos = () => favoritos.size;
+  const notificarCambio = useCallback((nuevos) => {
+    sendMessage({ type: 'FAVORITOS_UPDATE', favoritos: [...nuevos], timestamp: Date.now() });
+  }, [sendMessage]);
 
-  // Agrega múltiples favoritos de una vez
-  const agregarFavoritos = (productosIds) => {
+  const toggleFavorito = useCallback((productoId) => {
     setFavoritos(prev => {
       const nuevos = new Set(prev);
-      productosIds.forEach(id => {
-        if (nuevos.size < APP_CONFIG.MAX_FAVORITOS) {
-          nuevos.add(id);
-        }
-      });
+      if (nuevos.has(productoId)) {
+        nuevos.delete(productoId);
+      } else if (nuevos.size < APP_CONFIG.MAX_FAVORITOS) {
+        nuevos.add(productoId);
+      } else {
+        return prev;
+      }
+      notificarCambio(nuevos);
       return nuevos;
     });
-  };
+  }, [notificarCambio]);
 
-  // Agrega un producto a favoritos (sin toggle)
-  const agregarFavorito = (productoId) => {
-    if (favoritos.size >= APP_CONFIG.MAX_FAVORITOS) {
-      console.warn(`Máximo ${APP_CONFIG.MAX_FAVORITOS} favoritos permitidos`);
-      return false;
-    }
-    setFavoritos(prev => new Set([...prev, productoId]));
-    return true;
-  };
-
-  // Remueve un producto de favoritos (sin toggle)
-  const removerFavorito = (productoId) => {
-    setFavoritos(prev => {
-      const nuevos = new Set(prev);
-      nuevos.delete(productoId);
-      return nuevos;
-    });
-  };
-
-  // Limpia todos los favoritos con confirmación
-  const limpiarFavoritos = (confirmar = true) => {
-    if (confirmar && favoritos.size > 0) {
-      const confirmarLimpieza = window.confirm('¿Estás seguro de que quieres eliminar todos los favoritos?');
-      if (!confirmarLimpieza) return false;
-    }
-    setFavoritos(new Set());
+  const limpiarFavoritos = useCallback(() => {
+    if (favoritos.size > 0 && !window.confirm('¿Eliminar todos los favoritos?')) return false;
+    const nuevos = new Set();
+    setFavoritos(nuevos);
     removeFavoritosArray();
+    notificarCambio(nuevos);
     return true;
-  };
+  }, [favoritos.size, removeFavoritosArray, notificarCambio]);
 
-  // Exportar favoritos como JSON
-  const exportarFavoritos = () => {
-    const datos = {
-      favoritos: obtenerFavoritos(),
-      cantidad: cantidadFavoritos(),
-      exportado: new Date().toISOString()
-    };
-    return JSON.stringify(datos, null, 2);
-  };
+  const exportarFavoritos = () => JSON.stringify({
+    favoritos: [...favoritos],
+    cantidad: favoritos.size,
+    exportado: new Date().toISOString()
+  }, null, 2);
 
-  // Importar favoritos desde JSON
-  const importarFavoritos = (jsonData) => {
+  const importarFavoritos = useCallback((jsonData) => {
     try {
-      const datos = JSON.parse(jsonData);
-      if (datos.favoritos && Array.isArray(datos.favoritos)) {
-        setFavoritos(new Set(datos.favoritos));
+      const { favoritos: importedFavoritos } = JSON.parse(jsonData);
+      if (Array.isArray(importedFavoritos)) {
+        const nuevos = new Set(importedFavoritos);
+        setFavoritos(nuevos);
+        notificarCambio(nuevos);
         return true;
       }
-      return false;
     } catch (error) {
-      console.error('Error al importar favoritos:', error);
-      return false;
+      console.error('Error importing favorites:', error);
     }
-  };
+    return false;
+  }, [notificarCambio]);
 
-  // Verificar si está en el límite
-  const enLimiteFavoritos = () => favoritos.size >= APP_CONFIG.MAX_FAVORITOS;
-
-  //----------------------------
-  // VALOR DEL CONTEXTO
-  //----------------------------
-  
   const value = {
-    // Estado
     favoritos,
-    
-    // Funciones principales
     toggleFavorito,
-    esFavorito,
-    
-    // Funciones de consulta
-    obtenerFavoritos,
-    cantidadFavoritos,
-    enLimiteFavoritos,
-    
-    // Funciones de modificación
-    agregarFavorito,
-    agregarFavoritos,
-    removerFavorito,
+    esFavorito: (id) => favoritos.has(id),
+    obtenerFavoritos: () => [...favoritos],
+    cantidadFavoritos: () => favoritos.size,
+    enLimiteFavoritos: () => favoritos.size >= APP_CONFIG.MAX_FAVORITOS,
     limpiarFavoritos,
-    
-    // Funciones de utilidad
     exportarFavoritos,
     importarFavoritos,
-    
-    // Constantes útiles
     maxFavoritos: APP_CONFIG.MAX_FAVORITOS
   };
 
-  return (
-    <FavoritosContext.Provider value={value}>
-      {children}
-    </FavoritosContext.Provider>
-  );
+  return <FavoritosContext.Provider value={value}>{children}</FavoritosContext.Provider>;
 };

@@ -1,53 +1,38 @@
 import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  CardMedia, 
-  Button, 
-  Checkbox,
-  CardActions,
-  Chip
-} from '@mui/material';
+import { Box, Typography, Card, CardContent, CardMedia, Button, Checkbox, CardActions, Chip, Container } from '@mui/material';
 import { Favorite, FavoriteBorder, Visibility } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
 
-/**
- * Componente Home - Página principal con grid de productos
- * Usando Context API
- */
 const Home = () => {
-  const { toggleFavorito, esFavorito } = useFavoritos();
+  const { toggleFavorito, esFavorito, cantidadFavoritos } = useFavoritos();
   const { obtenerProductos } = useProductos();
   const productos = obtenerProductos();
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h3" component="h1" sx={{ mb: 4, textAlign: 'center' }}>
-        Gestión de Productos
-      </Typography>
+    <Container maxWidth="xl" sx={{ py: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h3" component="h1">
+          Catálogo de Productos
+        </Typography>
+        {cantidadFavoritos() > 0 && (
+          <Chip icon={<Favorite />} label={`${cantidadFavoritos()} favoritos`} color="error" />
+        )}
+      </Box>
       
       <Box sx={{
         display: 'grid',
-        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-        gap: 3,
-        maxWidth: 1200,
-        margin: '0 auto'
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+        gap: 3
       }}>
         {productos.map(({ id, nombre, descripcion, precio, categoria, imagen }) => (
           <Card key={id} sx={{ 
-            display: 'flex',
+            display: 'flex', 
             flexDirection: 'column',
             '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 }
           }}>
             <Box sx={{ position: 'relative' }}>
-              <CardMedia
-                component="img"
-                height="200"
-                image={imagen}
-                alt={nombre}
-              />
+              <CardMedia component="img" height="200" image={imagen} alt={nombre} />
+              
               <Checkbox
                 icon={<FavoriteBorder />}
                 checkedIcon={<Favorite />}
@@ -59,50 +44,55 @@ const Home = () => {
                   right: 8,
                   color: 'white',
                   '&.Mui-checked': { color: 'red' },
-                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  backgroundColor: 'rgba(0,0,0,0.6)',
                   borderRadius: '50%'
                 }}
               />
+
               <Chip
-                label={`ID: ${id}`}
+                label={`#${id}`}
                 size="small"
                 sx={{
                   position: 'absolute',
                   top: 8,
                   left: 8,
-                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  backgroundColor: 'rgba(0,0,0,0.8)',
                   color: 'white'
                 }}
               />
             </Box>
+
             <CardContent sx={{ flexGrow: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                 <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
                   {nombre}
                 </Typography>
-                <Chip label={categoria} size="small" color="primary" />
+                <Chip label={categoria} size="small" color="primary" variant="outlined" />
               </Box>
+              
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {descripcion}
               </Typography>
-              <Typography variant="h6" color="primary" fontWeight="bold">
+              
+              <Typography variant="h5" color="primary" fontWeight="bold">
                 {precio}
               </Typography>
             </CardContent>
-            <CardActions sx={{ p: 2, pt: 0 }}>
+
+            <CardActions sx={{ p: 2 }}>
               <Button
-                variant="outlined"
+                variant="contained"
                 startIcon={<Visibility />}
                 onClick={() => alert(`Ver detalles de: ${nombre} (ID: ${id})`)}
                 fullWidth
               >
-                Ver más detalles
+                Ver Detalles
               </Button>
             </CardActions>
           </Card>
         ))}
       </Box>
-    </Box>
+    </Container>
   );
 };
 
