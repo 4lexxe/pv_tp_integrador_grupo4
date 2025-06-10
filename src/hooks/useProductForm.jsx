@@ -22,6 +22,13 @@ export const useProductForm = (mode, id) => {
     if (mode === 'edit' && id) {
       const producto = obtenerProductoPorId(parseInt(id));
       if (producto) {
+        // Verificar si es un producto local antes de permitir edición
+        if (!producto.esLocal) {
+          alert('Este producto viene de la API externa y no puede ser editado. Solo se pueden editar productos creados localmente.');
+          navigate('/');
+          return;
+        }
+        
         setFormData({
           nombre: producto.nombre,
           descripcion: producto.descripcion,
@@ -30,6 +37,7 @@ export const useProductForm = (mode, id) => {
           imagen: producto.imagen
         });
       } else {
+        alert('Producto no encontrado');
         navigate('/');
       }
     }
@@ -108,7 +116,7 @@ export const useProductForm = (mode, id) => {
       navigate('/');
       return true;
     } catch (error) {
-      alert('Error al guardar el producto');
+      alert(error.message || 'Error al guardar el producto');
       return false;
     } finally {
       setIsSubmitting(false);
