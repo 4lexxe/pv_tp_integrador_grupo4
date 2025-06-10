@@ -7,11 +7,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    // Optimizaciones para el build
+    // Cambiar la configuración del minificador
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: false, // Cambiado a false para mantener logs en producción por ahora
         drop_debugger: true
       }
     },
