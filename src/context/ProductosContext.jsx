@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { useCrossTabSync } from '../hooks/useCrossTabSync.jsx';
 
 const ProductosContext = createContext();
 
@@ -18,8 +19,73 @@ const productosIniciales = [
 ];
 
 export const ProductosProvider = ({ children }) => {
-  const [productos] = useState(productosIniciales);
+  const [productos, setProductos] = useState(productosIniciales);
   const [loading, setLoading] = useState(false);
+
+  // Sincronización entre pestañas
+  const handleMessage = useCallback((message) => {
+    if (message.type === 'PRODUCTOS_UPDATE') {
+      setProductos(message.productos);
+    }
+  }, []);
+
+  const { sendMessage } = useCrossTabSync('productos-sync', handleMessage);
+
+  // Notificar cambios a otras pestañas
+  const notificarCambio = useCallback((nuevosProductos) => {
+    sendMessage({
+      type: 'PRODUCTOS_UPDATE',
+      productos: nuevosProductos,
+      timestamp: Date.now()
+    });
+  }, [sendMessage]);
+
+  // Agregar nuevo producto
+  const agregarProducto = useCallback(async (nuevoProducto) => {
+    setLoading(true);
+    try {
+      const id = Math.max(...productos.map(p => p.id), 0) + 1;
+      const productoConId = { ...nuevoProducto, id };
+      
+      const nuevosProductos = [...productos, productoConId];
+      setProductos(nuevosProductos);
+      notificarCambio(nuevosProductos);
+      
+      return productoConId;
+    } finally {
+      setLoading(false);
+    }
+  }, [productos, notificarCambio]);
+
+  // Actualizar producto existente
+  const actualizarProducto = useCallback(async (id, datosActualizados) => {
+    setLoading(true);
+    try {
+      const nuevosProductos = productos.map(p => 
+        p.id === id ? { ...p, ...datosActualizados } : p
+      );
+      setProductos(nuevosProductos);
+      notificarCambio(nuevosProductos);
+      
+      return nuevosProductos.find(p => p.id === id);
+    } finally {
+      setLoading(false);
+    }
+  }, [productos, notificarCambio]);
+
+  // Eliminar producto
+  const eliminarProducto = useCallback(async (id) => {
+    setLoading(true);
+    try {
+      const nuevosProductos = productos.filter(p => p.id !== id);
+      setProductos(nuevosProductos);
+      notificarCambio(nuevosProductos);
+      
+      return true;
+    } finally {
+      setLoading(false);
+    }
+  }, [productos, notificarCambio]);
 
   const value = {
     productos,
@@ -32,6 +98,9 @@ export const ProductosProvider = ({ children }) => {
       p.nombre.toLowerCase().includes(termino.toLowerCase()) ||
       p.descripcion.toLowerCase().includes(termino.toLowerCase())
     ),
+    agregarProducto,
+    actualizarProducto,
+    eliminarProducto,
     cargarProductos: async () => {
       setLoading(true);
       await new Promise(resolve => setTimeout(resolve, 1000));

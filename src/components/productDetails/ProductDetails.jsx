@@ -5,7 +5,6 @@ import {
   Typography, 
   Card, 
   CardContent, 
-  CardMedia, 
   Button, 
   Chip, 
   Container,
@@ -18,9 +17,11 @@ import {
   FavoriteBorder, 
   ArrowBack, 
   Share,
-  ShoppingCart
+  ShoppingCart,
+  Edit
 } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
+import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -66,23 +67,31 @@ const ProductDetails = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Botón de regreso */}
-      <Button 
-        startIcon={<ArrowBack />} 
-        onClick={() => navigate(-1)}
-        sx={{ mb: 3 }}
-      >
-        Volver
-      </Button>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Button 
+          startIcon={<ArrowBack />} 
+          onClick={() => navigate(-1)}
+        >
+          Volver
+        </Button>
+        
+        <Button
+          variant="outlined"
+          startIcon={<Edit />}
+          onClick={() => navigate(`/editar-producto/${producto.id}`)}
+        >
+          Editar Producto
+        </Button>
+      </Box>
 
       <Grid container spacing={4}>
         {/* Imagen del producto */}
         <Grid item xs={12} md={6}>
           <Card sx={{ position: 'relative' }}>
-            <CardMedia
-              component="img"
-              image={producto.imagen}
+            <OptimizedImage
+              src={producto.imagen}
               alt={producto.nombre}
-              sx={{ height: 400, objectFit: 'cover' }}
+              height={400}
             />
             
             {/* Badge de favorito */}
