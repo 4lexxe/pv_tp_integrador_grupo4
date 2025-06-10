@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Badge, Box, Chip } from '@mui/material';
-import { Home as HomeIcon, Favorite, Settings, Cloud, CloudOff, Tab } from '@mui/icons-material';
+import { Home as HomeIcon, Favorite, Settings, Cloud, CloudOff, Tab, Info, Help } from '@mui/icons-material';
 import { useFavoritos } from '../../context/AppContext';
 import { useAppSync } from '../../hooks/useAppSync.jsx';
 
@@ -88,6 +88,24 @@ const Layout = () => {
               variant={isActive('/configuracion') ? 'outlined' : 'text'}
             >
               Config
+            </Button>
+
+            <Button 
+              color="inherit" 
+              startIcon={<Info />}
+              onClick={() => navigate('/acerca')}
+              variant={isActive('/acerca') ? 'outlined' : 'text'}
+            >
+              Acerca
+            </Button>
+
+            <Button 
+              color="inherit" 
+              startIcon={<Help />}
+              onClick={() => navigate('/ayuda')}
+              variant={isActive('/ayuda') ? 'outlined' : 'text'}
+            >
+              Ayuda
             </Button>
           </Box>
         </Toolbar>
