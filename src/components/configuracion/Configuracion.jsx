@@ -1,12 +1,15 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent, Switch, FormControlLabel, Button, Alert, Chip } from '@mui/material';
 import { Download, Upload } from '@mui/icons-material';
-import { useFavoritos } from '../../context/AppContext';
+import { useFavoritos, useProductos } from '../../context/AppContext';
 import { useAppSync } from '../../hooks/useAppSync.jsx';
 
 const Configuracion = () => {
   const { exportarFavoritos, importarFavoritos, cantidadFavoritos, limpiarFavoritos } = useFavoritos();
+  const { obtenerEstadisticas, refrescarProductos, limpiarCacheAPI, loading } = useProductos();
   const { isOnline, tabsConnected, lastSync, syncStatus } = useAppSync();
+
+  const stats = obtenerEstadisticas();
 
   const handleExportar = () => {
     try {
@@ -74,6 +77,71 @@ const Configuracion = () => {
           <Typography variant="body2" color="text.secondary">
             Los cambios se sincronizan automáticamente entre todas las pestañas abiertas
           </Typography>
+        </CardContent>
+      </Card>
+
+      {/* Productos y API */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>🛍️ Productos</Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+            <Chip 
+              label={`Total: ${stats.totalProductos}`} 
+              color="primary" 
+            />
+            <Chip 
+              label={`API: ${stats.productosAPI}`} 
+              color="info" 
+            />
+            <Chip 
+              label={`Locales: ${stats.productosLocales}`} 
+              color="secondary" 
+            />
+            <Chip 
+              label={`Categorías: ${stats.categorias}`} 
+              color="success" 
+            />
+          </Box>
+          
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Última actualización API: {stats.lastApiUpdate}
+          </Typography>
+          
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              variant="outlined"
+              onClick={async () => {
+                try {
+                  await refrescarProductos();
+                  alert('Productos actualizados desde la API');
+                } catch (error) {
+                  alert('Error al actualizar productos');
+                }
+              }}
+              disabled={loading}
+            >
+              {loading ? 'Actualizando...' : 'Actualizar API'}
+            </Button>
+            
+            <Button
+              variant="outlined"
+              color="warning"
+              onClick={() => {
+                if (window.confirm('¿Limpiar cache de productos de API?')) {
+                  limpiarCacheAPI();
+                  alert('Cache limpiado');
+                }
+              }}
+            >
+              Limpiar Cache
+            </Button>
+          </Box>
+          
+          {stats.needsUpdate && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              Los productos de API necesitan actualización (más de 30 minutos)
+            </Alert>
+          )}
         </CardContent>
       </Card>
 

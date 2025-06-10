@@ -7,9 +7,10 @@ import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const Home = () => {
   const { toggleFavorito, esFavorito, cantidadFavoritos } = useFavoritos();
-  const { obtenerProductos, loading, error, refrescarProductos } = useProductos();
+  const { obtenerProductos, loading, error, refrescarProductos, obtenerEstadisticas } = useProductos();
   const navigate = useNavigate();
   const productos = obtenerProductos();
+  const stats = obtenerEstadisticas();
 
   const handleRefresh = async () => {
     try {
@@ -22,13 +23,26 @@ const Home = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h3" component="h1">
-          Catálogo de Productos
-        </Typography>
+        <Box>
+          <Typography variant="h3" component="h1">
+            Catálogo de Productos
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            {stats.productosAPI} de API • {stats.productosLocales} locales • Total: {stats.totalProductos}
+          </Typography>
+        </Box>
         
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           {cantidadFavoritos() > 0 && (
             <Chip icon={<Favorite />} label={`${cantidadFavoritos()} favoritos`} color="error" />
+          )}
+          
+          {stats.needsUpdate && (
+            <Chip 
+              label="API desactualizada" 
+              color="warning" 
+              size="small"
+            />
           )}
           
           <IconButton
