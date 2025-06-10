@@ -18,7 +18,8 @@ import {
   FavoriteBorder, 
   ArrowBack, 
   Share,
-  ShoppingCart
+  ShoppingCart,
+  Edit
 } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
 
@@ -66,13 +67,22 @@ const ProductDetails = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Botón de regreso */}
-      <Button 
-        startIcon={<ArrowBack />} 
-        onClick={() => navigate(-1)}
-        sx={{ mb: 3 }}
-      >
-        Volver
-      </Button>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Button 
+          startIcon={<ArrowBack />} 
+          onClick={() => navigate(-1)}
+        >
+          Volver
+        </Button>
+        
+        <Button
+          variant="outlined"
+          startIcon={<Edit />}
+          onClick={() => navigate(`/editar-producto/${producto.id}`)}
+        >
+          Editar Producto
+        </Button>
+      </Box>
 
       <Grid container spacing={4}>
         {/* Imagen del producto */}

@@ -18,6 +18,9 @@ const Layout = () => {
     if (location.pathname.startsWith('/producto/')) {
       return 'Detalle del Producto';
     }
+    if (location.pathname.startsWith('/editar-producto/')) {
+      return 'Editar Producto';
+    }
     switch (location.pathname) {
       case '/':
         return 'Inicio';
@@ -25,6 +28,8 @@ const Layout = () => {
         return 'Favoritos';
       case '/configuracion':
         return 'Configuración';
+      case '/crear-producto':
+        return 'Crear Producto';
       default:
         return 'Página';
     }

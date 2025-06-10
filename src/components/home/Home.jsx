@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent, CardMedia, Button, Checkbox, CardActions, Chip, Container } from '@mui/material';
-import { Favorite, FavoriteBorder, Visibility } from '@mui/icons-material';
+import { Favorite, FavoriteBorder, Visibility, Add } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,9 +16,22 @@ const Home = () => {
         <Typography variant="h3" component="h1">
           Catálogo de Productos
         </Typography>
-        {cantidadFavoritos() > 0 && (
-          <Chip icon={<Favorite />} label={`${cantidadFavoritos()} favoritos`} color="error" />
-        )}
+        
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {cantidadFavoritos() > 0 && (
+            <Chip icon={<Favorite />} label={`${cantidadFavoritos()} favoritos`} color="error" />
+          )}
+          
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => navigate('/crear-producto')}
+            size="large"
+            sx={{ fontWeight: 'bold' }}
+          >
+            Crear Producto
+          </Button>
+        </Box>
       </Box>
       
       <Box sx={{
