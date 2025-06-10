@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AppProvider } from './context/AppContext';
 import Layout from './components/layout/Layout';
@@ -13,12 +13,8 @@ import NotFound from './components/pages/NotFound';
 import About from './components/pages/About';
 import Help from './components/pages/Help';
 
-const theme = createTheme({
-  components: {
-    MuiCard: { styleOverrides: { root: { borderRadius: 12 } } },
-    MuiButton: { styleOverrides: { root: { textTransform: 'none' } } }
-  }
-});
+// Importar el tema desde el archivo separado
+import theme from './theme';
 
 function App() {
   return (
