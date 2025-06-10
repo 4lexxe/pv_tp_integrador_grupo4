@@ -9,6 +9,9 @@ import Favoritos from './components/favoritos/Favoritos';
 import Configuracion from './components/configuracion/Configuracion';
 import ProductDetails from './components/productDetails/ProductDetails';
 import ProductForm from './components/productForm/ProductForm';
+import NotFound from './components/pages/NotFound';
+import About from './components/pages/About';
+import Help from './components/pages/Help';
 
 const theme = createTheme({
   components: {
@@ -36,6 +39,9 @@ function App() {
               <Route path="producto/:id" element={<ProductDetails />} />
               <Route path="crear-producto" element={<ProductForm mode="create" />} />
               <Route path="editar-producto/:id" element={<ProductForm mode="edit" />} />
+              <Route path="acerca" element={<About />} />
+              <Route path="ayuda" element={<Help />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
         </Router>
