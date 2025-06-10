@@ -1,29 +1,24 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useProductos } from '../context/AppContext.jsx';
 
-/**
- * Hook personalizado para filtrar productos
- */
 export const useProductosFiltrados = (categoria, busqueda) => {
   const { obtenerProductos } = useProductos();
-  const [productosFiltrados, setProductosFiltrados] = useState([]);
 
-  useEffect(() => {
+  return useMemo(() => {
     let productos = obtenerProductos();
 
-    if (categoria) {
-      productos = productos.filter(producto => producto.categoria === categoria);
+    if (categoria && categoria !== 'todas') {
+      productos = productos.filter(p => p.categoria === categoria);
     }
 
     if (busqueda) {
-      productos = productos.filter(producto =>
-        producto.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(busqueda.toLowerCase())
+      const term = busqueda.toLowerCase();
+      productos = productos.filter(p =>
+        p.nombre.toLowerCase().includes(term) ||
+        p.descripcion.toLowerCase().includes(term)
       );
     }
 
-    setProductosFiltrados(productos);
-  }, [categoria, busqueda, obtenerProductos]);
-
-  return productosFiltrados;
+    return productos;
+  }, [obtenerProductos, categoria, busqueda]);
 };

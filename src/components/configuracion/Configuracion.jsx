@@ -2,9 +2,11 @@ import React from 'react';
 import { Box, Typography, Card, CardContent, Switch, FormControlLabel, Button, Alert, Chip } from '@mui/material';
 import { Download, Upload } from '@mui/icons-material';
 import { useFavoritos } from '../../context/AppContext';
+import { useAppSync } from '../../hooks/useAppSync.jsx';
 
 const Configuracion = () => {
   const { exportarFavoritos, importarFavoritos, cantidadFavoritos, limpiarFavoritos } = useFavoritos();
+  const { isOnline, tabsConnected, lastSync, syncStatus } = useAppSync();
 
   const handleExportar = () => {
     try {
@@ -50,6 +52,30 @@ const Configuracion = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         ⚙️ Configuración
       </Typography>
+
+      {/* Sincronización */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>🔄 Sincronización</Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+            <Chip 
+              label={`Estado: ${syncStatus}`} 
+              color={isOnline ? 'success' : 'error'} 
+            />
+            <Chip 
+              label={`Pestañas activas: ${tabsConnected}`} 
+              color="primary" 
+            />
+            <Chip 
+              label={`Última sync: ${lastSync.toLocaleTimeString()}`} 
+              color="info" 
+            />
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Los cambios se sincronizan automáticamente entre todas las pestañas abiertas
+          </Typography>
+        </CardContent>
+      </Card>
 
       {/* Sistema */}
       <Card sx={{ mb: 3 }}>

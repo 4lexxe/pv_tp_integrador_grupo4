@@ -1,13 +1,15 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button, Badge, Box } from '@mui/material';
-import { Home as HomeIcon, Favorite, Settings } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, Button, Badge, Box, Chip } from '@mui/material';
+import { Home as HomeIcon, Favorite, Settings, Cloud, CloudOff, Tab } from '@mui/icons-material';
 import { useFavoritos } from '../../context/AppContext';
+import { useAppSync } from '../../hooks/useAppSync.jsx';
 
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { cantidadFavoritos } = useFavoritos();
+  const { isOnline, tabsConnected, lastSync } = useAppSync();
 
   const isActive = (path) => location.pathname === path;
 
@@ -18,6 +20,25 @@ const Layout = () => {
           <Typography variant="h6" sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => navigate('/')}>
             🛍️ Gestión de Productos
           </Typography>
+          
+          {/* Indicadores de sincronización */}
+          <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+            <Chip
+              icon={isOnline ? <Cloud /> : <CloudOff />}
+              label={isOnline ? 'Online' : 'Offline'}
+              size="small"
+              color={isOnline ? 'success' : 'error'}
+              variant="outlined"
+              sx={{ color: 'white', borderColor: 'white' }}
+            />
+            <Chip
+              icon={<Tab />}
+              label={`${tabsConnected} tab${tabsConnected > 1 ? 's' : ''}`}
+              size="small"
+              variant="outlined"
+              sx={{ color: 'white', borderColor: 'white' }}
+            />
+          </Box>
           
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button 
