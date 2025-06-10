@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Card, CardContent, CardMedia, Button, CardActions, Chip, Alert, Container } from '@mui/material';
+import { Box, Typography, Card, CardContent, CardMedia, Button, CardActions, Chip, Alert, Container, Rating } from '@mui/material';
 import { Favorite, Visibility, Delete, ShoppingBag } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useProductos, useFavoritos } from '../../context/AppContext';
@@ -86,12 +86,43 @@ const Favoritos = () => {
 
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                    <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" component="h2" sx={{ 
+                      flexGrow: 1,
+                      fontSize: '1rem',
+                      fontWeight: 'bold',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
                       {producto.nombre}
                     </Typography>
                     <Chip label={producto.categoria} size="small" color="primary" variant="outlined" />
                   </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+
+                  {producto.rating && producto.rating.rate > 0 && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Rating 
+                        value={producto.rating.rate} 
+                        precision={0.1} 
+                        size="small" 
+                        readOnly 
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        ({producto.rating.count})
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Typography variant="body2" color="text.secondary" sx={{ 
+                    mb: 2,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical'
+                  }}>
                     {producto.descripcion}
                   </Typography>
                   <Typography variant="h5" color="primary" fontWeight="bold">

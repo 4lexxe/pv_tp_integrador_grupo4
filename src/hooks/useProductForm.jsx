@@ -108,7 +108,7 @@ export const useProductForm = (mode, id) => {
       navigate('/');
       return true;
     } catch (error) {
-      alert('Error al guardar el producto');
+      alert(error.message || 'Error al guardar el producto');
       return false;
     } finally {
       setIsSubmitting(false);

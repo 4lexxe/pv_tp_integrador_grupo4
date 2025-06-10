@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useCrossTabSync } from '../hooks/useCrossTabSync.jsx';
+import { useApi } from '../hooks/useApi.jsx';
+import productService from '../services/productService.jsx';
 
 const ProductosContext = createContext();
 
@@ -9,103 +11,170 @@ export const useProductos = () => {
   return context;
 };
 
-const productosIniciales = [
-  { id: 1, nombre: "Smartphone Galaxy", descripcion: "Teléfono inteligente con pantalla AMOLED de 6.1 pulgadas", precio: "$899.99", categoria: "Electrónicos", imagen: "https://via.placeholder.com/300x200/1976d2/ffffff?text=Smartphone" },
-  { id: 2, nombre: "Laptop Gaming", descripcion: "Laptop para gaming con RTX 4060 y 16GB RAM", precio: "$1,499.99", categoria: "Computadoras", imagen: "https://via.placeholder.com/300x200/dc004e/ffffff?text=Laptop" },
-  { id: 3, nombre: "Auriculares Wireless", descripcion: "Auriculares inalámbricos con cancelación de ruido", precio: "$299.99", categoria: "Audio", imagen: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Auriculares" },
-  { id: 4, nombre: "Monitor 4K", descripcion: "Monitor Ultra HD de 27 pulgadas para profesionales", precio: "$649.99", categoria: "Periféricos", imagen: "https://via.placeholder.com/300x200/ff9800/ffffff?text=Monitor" },
-  { id: 5, nombre: "Tablet Pro", descripcion: "Tablet profesional con stylus incluido y 256GB", precio: "$799.99", categoria: "Tablets", imagen: "https://via.placeholder.com/300x200/9c27b0/ffffff?text=Tablet" },
-  { id: 6, nombre: "Cámara DSLR", descripcion: "Cámara profesional de 24MP con lente 18-55mm", precio: "$1,199.99", categoria: "Fotografía", imagen: "https://via.placeholder.com/300x200/795548/ffffff?text=Cámara" }
-];
-
 export const ProductosProvider = ({ children }) => {
-  const [productos, setProductos] = useState(productosIniciales);
-  const [loading, setLoading] = useState(false);
+  const [productos, setProductos] = useState([]);
+  const [productosLocales, setProductosLocales] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const { loading, error, execute } = useApi();
 
   // Sincronización entre pestañas
   const handleMessage = useCallback((message) => {
     if (message.type === 'PRODUCTOS_UPDATE') {
       setProductos(message.productos);
+    } else if (message.type === 'PRODUCTOS_LOCALES_UPDATE') {
+      setProductosLocales(message.productosLocales);
     }
   }, []);
 
   const { sendMessage } = useCrossTabSync('productos-sync', handleMessage);
 
+  // Cargar productos de la API al iniciar
+  useEffect(() => {
+    cargarProductosDeAPI();
+    cargarCategorias();
+  }, []);
+
   // Notificar cambios a otras pestañas
-  const notificarCambio = useCallback((nuevosProductos) => {
+  const notificarCambio = useCallback((nuevosProductos, tipo = 'PRODUCTOS_UPDATE') => {
     sendMessage({
-      type: 'PRODUCTOS_UPDATE',
-      productos: nuevosProductos,
+      type: tipo,
+      productos: tipo === 'PRODUCTOS_UPDATE' ? nuevosProductos : undefined,
+      productosLocales: tipo === 'PRODUCTOS_LOCALES_UPDATE' ? nuevosProductos : undefined,
       timestamp: Date.now()
     });
   }, [sendMessage]);
 
-  // Agregar nuevo producto
-  const agregarProducto = useCallback(async (nuevoProducto) => {
-    setLoading(true);
+  // Cargar productos desde la API
+  const cargarProductosDeAPI = useCallback(async () => {
     try {
-      const id = Math.max(...productos.map(p => p.id), 0) + 1;
-      const productoConId = { ...nuevoProducto, id };
+      const productosAPI = await execute(() => productService.getAllProducts());
+      setProductos(productosAPI);
+    } catch (err) {
+      console.error('Error cargando productos de la API:', err);
+      // Fallback a productos locales si falla la API
+      setProductos([]);
+    }
+  }, [execute]);
+
+  // Cargar categorías desde la API
+  const cargarCategorias = useCallback(async () => {
+    try {
+      const categoriasAPI = await execute(() => productService.getCategories());
+      setCategorias(categoriasAPI);
+    } catch (err) {
+      console.error('Error cargando categorías:', err);
+      setCategorias(['Electrónicos', 'Ropa Masculina', 'Ropa Femenina', 'Joyería']);
+    }
+  }, [execute]);
+
+  // Obtener todos los productos (API + locales)
+  const obtenerProductos = useCallback(() => {
+    return [...productos, ...productosLocales];
+  }, [productos, productosLocales]);
+
+  // Buscar producto por ID (API + locales)
+  const obtenerProductoPorId = useCallback((id) => {
+    return obtenerProductos().find(p => p.id === id);
+  }, [obtenerProductos]);
+
+  // Filtrar por categoría
+  const obtenerProductosPorCategoria = useCallback((categoria) => {
+    return obtenerProductos().filter(p => p.categoria === categoria);
+  }, [obtenerProductos]);
+
+  // Obtener categorías (API + locales)
+  const obtenerCategorias = useCallback(() => {
+    const categoriasLocales = [...new Set(productosLocales.map(p => p.categoria))];
+    return [...new Set([...categorias, ...categoriasLocales])];
+  }, [categorias, productosLocales]);
+
+  // Buscar productos
+  const buscarProductos = useCallback((termino) => {
+    return productService.searchProducts(obtenerProductos(), termino);
+  }, [obtenerProductos]);
+
+  // Agregar producto local (no a la API)
+  const agregarProducto = useCallback(async (nuevoProducto) => {
+    try {
+      const id = Math.max(
+        ...obtenerProductos().map(p => p.id),
+        1000 // Empezar IDs locales desde 1000
+      ) + 1;
       
-      const nuevosProductos = [...productos, productoConId];
-      setProductos(nuevosProductos);
-      notificarCambio(nuevosProductos);
+      const productoConId = { ...nuevoProducto, id, esLocal: true };
+      const nuevosLocales = [...productosLocales, productoConId];
+      
+      setProductosLocales(nuevosLocales);
+      notificarCambio(nuevosLocales, 'PRODUCTOS_LOCALES_UPDATE');
       
       return productoConId;
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      throw new Error('Error al agregar producto');
     }
-  }, [productos, notificarCambio]);
+  }, [productosLocales, obtenerProductos, notificarCambio]);
 
-  // Actualizar producto existente
+  // Actualizar producto (solo locales)
   const actualizarProducto = useCallback(async (id, datosActualizados) => {
-    setLoading(true);
     try {
-      const nuevosProductos = productos.map(p => 
+      // Solo permitir editar productos locales
+      const productoExistente = productosLocales.find(p => p.id === id);
+      if (!productoExistente) {
+        throw new Error('Solo se pueden editar productos creados localmente');
+      }
+
+      const nuevosLocales = productosLocales.map(p => 
         p.id === id ? { ...p, ...datosActualizados } : p
       );
-      setProductos(nuevosProductos);
-      notificarCambio(nuevosProductos);
       
-      return nuevosProductos.find(p => p.id === id);
-    } finally {
-      setLoading(false);
+      setProductosLocales(nuevosLocales);
+      notificarCambio(nuevosLocales, 'PRODUCTOS_LOCALES_UPDATE');
+      
+      return nuevosLocales.find(p => p.id === id);
+    } catch (error) {
+      throw error;
     }
-  }, [productos, notificarCambio]);
+  }, [productosLocales, notificarCambio]);
 
-  // Eliminar producto
+  // Eliminar producto (solo locales)
   const eliminarProducto = useCallback(async (id) => {
-    setLoading(true);
     try {
-      const nuevosProductos = productos.filter(p => p.id !== id);
-      setProductos(nuevosProductos);
-      notificarCambio(nuevosProductos);
+      const productoExistente = productosLocales.find(p => p.id === id);
+      if (!productoExistente) {
+        throw new Error('Solo se pueden eliminar productos creados localmente');
+      }
+
+      const nuevosLocales = productosLocales.filter(p => p.id !== id);
+      setProductosLocales(nuevosLocales);
+      notificarCambio(nuevosLocales, 'PRODUCTOS_LOCALES_UPDATE');
       
       return true;
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      throw error;
     }
-  }, [productos, notificarCambio]);
+  }, [productosLocales, notificarCambio]);
+
+  // Refrescar productos de la API
+  const refrescarProductos = useCallback(async () => {
+    await cargarProductosDeAPI();
+    await cargarCategorias();
+  }, [cargarProductosDeAPI, cargarCategorias]);
 
   const value = {
-    productos,
+    productos: obtenerProductos(),
+    productosAPI: productos,
+    productosLocales,
     loading,
-    obtenerProductos: () => productos,
-    obtenerProductoPorId: (id) => productos.find(p => p.id === id),
-    obtenerProductosPorCategoria: (categoria) => productos.filter(p => p.categoria === categoria),
-    obtenerCategorias: () => [...new Set(productos.map(p => p.categoria))],
-    buscarProductos: (termino) => productos.filter(p => 
-      p.nombre.toLowerCase().includes(termino.toLowerCase()) ||
-      p.descripcion.toLowerCase().includes(termino.toLowerCase())
-    ),
+    error,
+    obtenerProductos,
+    obtenerProductoPorId,
+    obtenerProductosPorCategoria,
+    obtenerCategorias,
+    buscarProductos,
     agregarProducto,
     actualizarProducto,
     eliminarProducto,
-    cargarProductos: async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setLoading(false);
-    }
+    cargarProductos: cargarProductosDeAPI,
+    refrescarProductos
   };
 
   return <ProductosContext.Provider value={value}>{children}</ProductosContext.Provider>;

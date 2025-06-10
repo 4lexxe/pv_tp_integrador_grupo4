@@ -10,7 +10,9 @@ import {
   Container,
   Grid,
   Alert,
-  IconButton
+  IconButton,
+  Rating,
+  Divider
 } from '@mui/material';
 import { 
   Favorite, 
@@ -160,6 +162,26 @@ const ProductDetails = () => {
               </Box>
             </Box>
 
+            {/* Rating y reviews de la API */}
+            {producto.rating && producto.rating.rate > 0 && (
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                  <Rating 
+                    value={producto.rating.rate} 
+                    precision={0.1} 
+                    readOnly 
+                  />
+                  <Typography variant="h6" fontWeight="bold">
+                    {producto.rating.rate.toFixed(1)}
+                  </Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Basado en {producto.rating.count} reseñas
+                </Typography>
+                <Divider sx={{ mt: 2 }} />
+              </Box>
+            )}
+
             {/* Precio destacado */}
             <Box sx={{ mb: 4, p: 3, backgroundColor: 'primary.main', borderRadius: 2, color: 'white' }}>
               <Typography variant="h3" fontWeight="bold" gutterBottom>
@@ -203,14 +225,33 @@ const ProductDetails = () => {
                       {producto.categoria}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">
-                      Nombre Completo:
-                    </Typography>
-                    <Typography variant="body1" fontWeight="bold">
-                      {producto.nombre}
-                    </Typography>
-                  </Grid>
+                  {producto.rating && producto.rating.rate > 0 && (
+                    <>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Calificación:
+                        </Typography>
+                        <Typography variant="body1" fontWeight="bold">
+                          {producto.rating.rate.toFixed(1)} / 5.0
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Reseñas:
+                        </Typography>
+                        <Typography variant="body1" fontWeight="bold">
+                          {producto.rating.count} valoraciones
+                        </Typography>
+                      </Grid>
+                    </>
+                  )}
+                  {producto.esLocal && (
+                    <Grid item xs={12}>
+                      <Alert severity="info" sx={{ mt: 1 }}>
+                        Este es un producto creado localmente
+                      </Alert>
+                    </Grid>
+                  )}
                 </Grid>
               </CardContent>
             </Card>
