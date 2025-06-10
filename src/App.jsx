@@ -9,16 +9,12 @@ import Home from './components/home/Home';
 //----------------------------
 const theme = createTheme();
 
-/**
- * Componente principal de la aplicación
- * Configura el tema de Material UI y el estado global
- */
 function App() {
   return (
-    <ThemeProvider theme={theme}>      {/* ✅ Proporciona tema de Material UI */}
+    <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppProvider>                    {/* ✅ Proporciona estado global */}
-        <Home />                       {/* ✅ Home puede usar useProductos() y useFavoritos() */}
+      <AppProvider>
+        <Home />
       </AppProvider>
     </ThemeProvider>
   );

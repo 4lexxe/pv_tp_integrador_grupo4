@@ -25,9 +25,9 @@ export { useProductos } from './ProductosContext';
 export { useFavoritos } from './FavoritosContext';
 
 // Exportar hooks personalizados
-export { useLocalStorage } from '../hooks/useLocalStorage';
-export { useNotificaciones } from '../hooks/useNotificaciones';
-export { useProductosFiltrados } from '../hooks/useProductosFiltrados';
+export { useLocalStorage } from '../hooks/useLocalStorage.jsx';
+export { useNotificaciones } from '../hooks/useNotificaciones.jsx';
+export { useProductosFiltrados } from '../hooks/useProductosFiltrados.jsx';
 
 // Exportar constantes globales
-export * from '../utils/constants';
+export * from '../utils/constants.jsx';

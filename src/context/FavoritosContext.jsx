@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { STORAGE_KEYS, APP_CONFIG, MENSAJES } from '../utils/constants';
+import { useLocalStorage } from '../hooks/useLocalStorage.jsx';
+import { STORAGE_KEYS, APP_CONFIG, MENSAJES } from '../utils/constants.jsx';
 
 //----------------------------
 // CONTEXT API PARA FAVORITOS MEJORADO

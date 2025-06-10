@@ -15,6 +15,7 @@ import { useProductos, useFavoritos } from '../../context/AppContext';
 
 /**
  * Componente Home - Página principal con grid de productos
+ * Usando Context API
  */
 const Home = () => {
   const { toggleFavorito, esFavorito } = useFavoritos();
