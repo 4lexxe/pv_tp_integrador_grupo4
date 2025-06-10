@@ -77,13 +77,16 @@ const ProductDetails = () => {
           Volver
         </Button>
         
-        <Button
-          variant="outlined"
-          startIcon={<Edit />}
-          onClick={() => navigate(`/editar-producto/${producto.id}`)}
-        >
-          Editar Producto
-        </Button>
+        {/* Solo mostrar botón editar para productos locales */}
+        {producto.esLocal && (
+          <Button
+            variant="outlined"
+            startIcon={<Edit />}
+            onClick={() => navigate(`/editar-producto/${producto.id}`)}
+          >
+            Editar Producto
+          </Button>
+        )}
       </Box>
 
       <Grid container spacing={4}>
@@ -248,7 +251,19 @@ const ProductDetails = () => {
                   {producto.esLocal && (
                     <Grid item xs={12}>
                       <Alert severity="info" sx={{ mt: 1 }}>
-                        Este es un producto creado localmente
+                        <Typography variant="body2">
+                          Este es un producto creado localmente - Puede ser editado
+                        </Typography>
+                      </Alert>
+                    </Grid>
+                  )}
+                  
+                  {!producto.esLocal && (
+                    <Grid item xs={12}>
+                      <Alert severity="warning" sx={{ mt: 1 }}>
+                        <Typography variant="body2">
+                          Producto de API externa - Solo lectura
+                        </Typography>
                       </Alert>
                     </Grid>
                   )}
