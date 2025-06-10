@@ -10,8 +10,7 @@ build/
 out/
 *.tsbuildinfo
 
-# Environment variables
-.env
+# Environment variables (except .env which we need for Vercel)
 .env.local
 .env.development.local
 .env.test.local
@@ -112,3 +111,6 @@ obj/
 *.bak
 *.backup
 *.old
+
+# Vercel
+.vercel
