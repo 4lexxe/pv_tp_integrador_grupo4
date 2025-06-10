@@ -3,13 +3,12 @@ import { ProductosProvider } from './ProductosContext';
 import { FavoritosProvider } from './FavoritosContext';
 
 //----------------------------
-// CONTEXTO PRINCIPAL DE LA APP
+// CONTEXTO PRINCIPAL DE LA APP MEJORADO
 //----------------------------
 
 /**
  * Provider principal que combina todos los contextos de la aplicación
- * Esto permite tener un punto central para manejar todo el estado global
- * y evita el "wrapper hell" en App.jsx
+ * Proporciona acceso global a productos, favoritos y utilidades
  */
 export const AppProvider = ({ children }) => {
   return (
@@ -24,3 +23,11 @@ export const AppProvider = ({ children }) => {
 // Exportar hooks para fácil acceso
 export { useProductos } from './ProductosContext';
 export { useFavoritos } from './FavoritosContext';
+
+// Exportar hooks personalizados
+export { useLocalStorage } from '../hooks/useLocalStorage';
+export { useNotificaciones } from '../hooks/useNotificaciones';
+export { useProductosFiltrados } from '../hooks/useProductosFiltrados';
+
+// Exportar constantes globales
+export * from '../utils/constants';

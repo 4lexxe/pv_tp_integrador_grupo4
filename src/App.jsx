@@ -15,11 +15,10 @@ const theme = createTheme();
  */
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>      {/* ✅ Proporciona tema de Material UI */}
       <CssBaseline />
-      {/* AppProvider envuelve toda la aplicación con los contextos necesarios */}
-      <AppProvider>
-        <Home />
+      <AppProvider>                    {/* ✅ Proporciona estado global */}
+        <Home />                       {/* ✅ Home puede usar useProductos() y useFavoritos() */}
       </AppProvider>
     </ThemeProvider>
   );
