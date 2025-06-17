@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Box, 
   Typography, 
@@ -10,16 +10,8 @@ import {
   Chip, 
   Alert, 
   CircularProgress, 
-  IconButton, 
   Rating,
   Grid,
-  Paper,
-  InputBase,
-  Divider,
-  FormControl,
-  Select,
-  InputLabel,
-  MenuItem,
   Badge,
   useTheme,
   alpha
@@ -28,16 +20,15 @@ import {
   Favorite, 
   FavoriteBorder, 
   Visibility, 
-  Add, 
-  Refresh, 
-  Search,
-  FilterList,
+  Add,
   Dashboard as DashboardIcon
 } from '@mui/icons-material';
 import { useProductos, useFavoritos } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { useProductFilter } from '../../hooks/useProductFilter';
 import OptimizedImage from '../common/OptimizedImage.jsx';
 import DashboardMetrics from '../dashboard/DashboardMetrics.jsx';
+import { FilterControls, SearchResultsHeader, NoResults } from '../search';
 
 const Home = () => {
   const theme = useTheme();
@@ -45,31 +36,22 @@ const Home = () => {
   const { obtenerProductos, obtenerCategorias, loading, error, refrescarProductos, obtenerEstadisticas } = useProductos();
   const navigate = useNavigate();
   
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  
   const stats = obtenerEstadisticas();
   const categorias = obtenerCategorias();
+  const allProducts = obtenerProductos();
   
-  // Filtrar productos según búsqueda y categoría
-  const productos = obtenerProductos().filter(producto => {
-    // Filtro por categoría
-    if (selectedCategory && producto.categoria !== selectedCategory) {
-      return false;
-    }
-    
-    // Filtro por término de búsqueda
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      return (
-        producto.nombre.toLowerCase().includes(term) ||
-        producto.descripcion.toLowerCase().includes(term) ||
-        producto.categoria.toLowerCase().includes(term)
-      );
-    }
-    
-    return true;
-  });
+  // Hook personalizado para filtrado
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredProducts,
+    clearFilters,
+    hasActiveFilters,
+    resultsCount,
+    totalCount
+  } = useProductFilter(allProducts);
 
   const handleRefresh = async () => {
     try {
@@ -174,69 +156,17 @@ const Home = () => {
       {/* Dashboard Metrics */}
       <DashboardMetrics />
 
-      {/* Barra de filtros y búsqueda */}
-      <Card sx={{ p: 2, mb: 4, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          backgroundColor: alpha(theme.palette.background.default, 0.5), 
-          borderRadius: 1, 
-          flex: 1,
-          border: '1px solid',
-          borderColor: alpha(theme.palette.primary.main, 0.1),
-        }}>
-          <IconButton sx={{ p: '10px' }} aria-label="search">
-            <Search />
-          </IconButton>
-          <InputBase
-            sx={{ ml: 1, flex: 1 }}
-            placeholder="Buscar productos..."
-            inputProps={{ 'aria-label': 'buscar productos' }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <IconButton sx={{ p: '10px' }} aria-label="clear" onClick={() => setSearchTerm('')}>
-              &times;
-            </IconButton>
-          )}
-        </Box>
-        
-        <Divider sx={{ height: 28, m: 0.5, display: { xs: 'none', sm: 'block' } }} orientation="vertical" />
-        
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <FilterList sx={{ color: theme.palette.primary.main }} />
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Categoría</InputLabel>
-            <Select
-              value={selectedCategory}
-              label="Categoría"
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem value="">Todas</MenuItem>
-              {categorias.map((cat) => (
-                <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          
-          <IconButton
-            onClick={handleRefresh}
-            disabled={loading}
-            title="Refrescar productos"
-            color="primary"
-            sx={{ 
-              border: '1px solid',
-              borderColor: alpha(theme.palette.primary.main, 0.2),
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              }
-            }}
-          >
-            <Refresh />
-          </IconButton>
-        </Box>
-      </Card>
+      {/* Controles de filtrado modulares */}
+      <FilterControls
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        categories={categorias}
+        onRefresh={handleRefresh}
+        loading={loading}
+        searchPlaceholder="Buscar productos..."
+      />
 
       {/* Estado de error */}
       {error && (
@@ -260,35 +190,17 @@ const Home = () => {
       )}
       
       {/* Grid de productos */}
-      {!loading && productos.length > 0 && (
+      {!loading && filteredProducts.length > 0 && (
         <>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1, 
-            mb: 2,
-            background: alpha(theme.palette.background.paper, 0.5),
-            backdropFilter: 'blur(5px)',
-            borderRadius: 2,
-            p: 1.5,
-            border: '1px solid',
-            borderColor: alpha(theme.palette.primary.main, 0.1),
-          }}>
-            <FilterList fontSize="small" color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 500, color: theme.palette.primary.light }}>
-              {selectedCategory ? `Categoría: ${selectedCategory}` : 'Todos los productos'} 
-            </Typography>
-            <Chip 
-              label={`${productos.length} productos`} 
-              size="small" 
-              color="primary"
-              sx={{ ml: 1 }} 
-              variant="outlined" 
-            />
-          </Box>
+          <SearchResultsHeader
+            selectedCategory={selectedCategory}
+            resultsCount={resultsCount}
+            totalCount={totalCount}
+            searchTerm={searchTerm}
+          />
           
           <Grid container spacing={3}>
-            {productos.map(({ id, nombre, descripcion, precio, categoria, imagen, rating, esLocal }) => (
+            {filteredProducts.map(({ id, nombre, descripcion, precio, categoria, imagen, rating, esLocal }) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={id}>
                 <Card sx={{ 
                   display: 'flex', 
@@ -469,38 +381,13 @@ const Home = () => {
       )}
 
       {/* Mensaje cuando no hay productos */}
-      {!loading && productos.length === 0 && (
-        <Card sx={{ textAlign: 'center', py: 8, backdropFilter: 'blur(10px)' }}>
-          <Alert severity="info" sx={{ maxWidth: 600, mx: 'auto', mb: 3, backgroundColor: alpha(theme.palette.info.main, 0.1) }}>
-            <Typography variant="h6" gutterBottom>
-              No hay productos disponibles
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              {searchTerm || selectedCategory ? 
-                'No se encontraron productos con los filtros seleccionados.' : 
-                'Verifica tu conexión a internet o crea un producto local.'}
-            </Typography>
-          </Alert>
-          
-          {(searchTerm || selectedCategory) && (
-            <Button 
-              variant="outlined" 
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('');
-              }}
-              sx={{
-                borderColor: alpha(theme.palette.primary.main, 0.5),
-                '&:hover': {
-                  borderColor: theme.palette.primary.main,
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                }
-              }}
-            >
-              Limpiar filtros
-            </Button>
-          )}
-        </Card>
+      {!loading && filteredProducts.length === 0 && (
+        <NoResults
+          searchTerm={searchTerm}
+          selectedCategory={selectedCategory}
+          onClearFilters={clearFilters}
+          title={hasActiveFilters ? "No se encontraron productos" : "No hay productos disponibles"}
+        />
       )}
       
       {/* Estadísticas en footer */}
