@@ -1,7 +1,8 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent, Switch, FormControlLabel, Button, Alert, Chip } from '@mui/material';
 import { Download, Upload } from '@mui/icons-material';
-import { useFavoritos, useProductos } from '../../context/AppContext';
+import { useFavoritos } from '../../context/FavoritosContext'; 
+import { useProductos } from '../../context/ProductosContext';
 import { useAppSync } from '../../hooks/useAppSync.jsx';
 
 const Configuracion = () => {

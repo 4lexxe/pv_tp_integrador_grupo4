@@ -8,7 +8,8 @@ import {
   Storage, 
   Category
 } from '@mui/icons-material';
-import { useProductos, useFavoritos } from '../../context/AppContext';
+import { useFavoritos } from '../../context/FavoritosContext'; 
+import { useProductos } from '../../context/ProductosContext';
 
 const MetricCard = ({ title, value, icon, color, trend = null, subtitle = null }) => {
   const theme = useTheme();

@@ -22,7 +22,8 @@ import {
   ShoppingCart,
   Edit
 } from '@mui/icons-material';
-import { useProductos, useFavoritos } from '../../context/AppContext';
+import { useProductos } from '../../context/ProductosContext';
+import { useFavoritos } from '../../context/FavoritosContext';
 import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const ProductDetails = () => {

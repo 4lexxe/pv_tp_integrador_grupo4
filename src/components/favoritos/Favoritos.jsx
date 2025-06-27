@@ -2,7 +2,8 @@ import React from 'react';
 import { Box, Typography, Card, CardContent, CardMedia, Button, CardActions, Chip, Alert, Container, Rating } from '@mui/material';
 import { Favorite, Visibility, Delete, ShoppingBag } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useProductos, useFavoritos } from '../../context/AppContext';
+import { useProductos } from '../../context/ProductosContext';
+import { useFavoritos } from '../../context/FavoritosContext';
 import OptimizedImage from '../common/OptimizedImage.jsx';
 
 const Favoritos = () => {

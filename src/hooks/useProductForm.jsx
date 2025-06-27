@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProductos } from '../context/AppContext';
-
+import { useProductos } from '../../context/ProductosContext';
 export const useProductForm = (mode, id) => {
   const navigate = useNavigate();
   const { obtenerProductoPorId, agregarProducto, actualizarProducto } = useProductos();

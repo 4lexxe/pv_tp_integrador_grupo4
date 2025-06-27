@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AppProvider } from './context/AppContext';
+import { AppContextProvider } from './context/AppContext';
 import Layout from './components/layout/Layout';
 import Home from './components/home/Home';
 import Favoritos from './components/favoritos/Favoritos';
@@ -13,6 +13,10 @@ import NotFound from './components/pages/NotFound';
 import About from './components/pages/About';
 import Help from './components/pages/Help';
 
+import Registro from './components/pages/Registro'; 
+import Login from './components/pages/Login';     
+import PrivateRoute from './components/PrivateRoute'; 
+
 // Importar el tema desde el archivo separado
 import theme from './theme';
 
@@ -20,7 +24,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppProvider>
+      <AppContextProvider>
         <Router
           future={{
             v7_startTransition: true,
@@ -28,20 +32,31 @@ function App() {
           }}
         >
           <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="favoritos" element={<Favoritos />} />
-              <Route path="configuracion" element={<Configuracion />} />
-              <Route path="producto/:id" element={<ProductDetails />} />
-              <Route path="crear-producto" element={<ProductForm mode="create" />} />
-              <Route path="editar-producto/:id" element={<ProductForm mode="edit" />} />
-              <Route path="acerca" element={<About />} />
-              <Route path="ayuda" element={<Help />} />
-              <Route path="*" element={<NotFound />} />
+           
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
+            <Route path="/acerca" element={<Layout />}> 
+              <Route index element={<About />} />
             </Route>
+            <Route path="/ayuda" element={<Layout />}>
+              <Route index element={<Help />} />
+            </Route>
+
+            <Route element={<PrivateRoute />}>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="favoritos" element={<Favoritos />} />
+                <Route path="configuracion" element={<Configuracion />} />
+                <Route path="producto/:id" element={<ProductDetails />} />
+                <Route path="crear-producto" element={<ProductForm mode="create" />} />
+                <Route path="editar-producto/:id" element={<ProductForm mode="edit" />} />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
-      </AppProvider>
+      </AppContextProvider>
     </ThemeProvider>
   );
 }

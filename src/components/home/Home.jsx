@@ -23,7 +23,8 @@ import {
   Add,
   Dashboard as DashboardIcon
 } from '@mui/icons-material';
-import { useProductos, useFavoritos } from '../../context/AppContext';
+import { useProductos } from '../../context/ProductosContext';
+import { useFavoritos } from '../../context/FavoritosContext';
 import { useNavigate } from 'react-router-dom';
 import { useProductFilter } from '../../hooks/useProductFilter';
 import OptimizedImage from '../common/OptimizedImage.jsx';
