@@ -1,13 +1,13 @@
-import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import React from "react";
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
-const CategoryFilter = ({ 
-  selectedCategory, 
-  onCategoryChange, 
+const CategoryFilter = ({
+  selectedCategory,
+  onCategoryChange,
   categories = [],
-  label = "Categoría",
+  label = "",
   placeholder = "Todas",
-  sx = {}
+  sx = {},
 }) => {
   return (
     <FormControl size="small" sx={{ minWidth: 150, ...sx }}>
