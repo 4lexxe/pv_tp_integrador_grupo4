@@ -22,7 +22,6 @@ const ProductForm = ({ mode = "create" }) => {
     opciones: categoriasConfig.opciones,
     existentes: obtenerCategorias(),
   };
-  console.log(categorias.existentes);
   const handleGenerateImage = () => {
     const imageUrl = generatePlaceholderImage(formData.nombre);
     handleChange("imagen", imageUrl);
