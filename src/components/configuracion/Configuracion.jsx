@@ -1,13 +1,34 @@
-import React from 'react';
-import { Box, Typography, Card, CardContent, Switch, FormControlLabel, Button, Alert, Chip } from '@mui/material';
-import { Download, Upload } from '@mui/icons-material';
-import { useFavoritos } from '../../context/FavoritosContext'; 
-import { useProductos } from '../../context/ProductosContext';
-import { useAppSync } from '../../hooks/useAppSync.jsx';
+import React from "react";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Switch,
+  FormControlLabel,
+  Button,
+  Alert,
+  Chip,
+} from "@mui/material";
+import { Download, Upload } from "@mui/icons-material";
+import { useFavoritos } from "../../context/FavoritosContext";
+import { useProductos } from "../../context/ProductosContext";
+import { useAppSync } from "../../hooks/useAppSync.jsx";
 
 const Configuracion = () => {
-  const { exportarFavoritos, importarFavoritos, cantidadFavoritos, limpiarFavoritos } = useFavoritos();
-  const { obtenerEstadisticas, refrescarProductos, limpiarCacheAPI, loading } = useProductos();
+  const {
+    exportarFavoritos,
+    importarFavoritos,
+    cantidadFavoritos,
+    limpiarFavoritos,
+  } = useFavoritos();
+  const {
+    obtenerEstadisticas,
+    refrescarProductos,
+    limpiarCacheAPI,
+    loading,
+    eliminarProductosLocales,
+  } = useProductos();
   const { isOnline, tabsConnected, lastSync, syncStatus } = useAppSync();
 
   const stats = obtenerEstadisticas();
@@ -15,24 +36,24 @@ const Configuracion = () => {
   const handleExportar = () => {
     try {
       const datos = exportarFavoritos();
-      const blob = new Blob([datos], { type: 'application/json' });
+      const blob = new Blob([datos], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `favoritos-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `favoritos-${new Date().toISOString().split("T")[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      alert('Error al exportar favoritos');
+      alert("Error al exportar favoritos");
     }
   };
 
   const handleImportar = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -40,9 +61,13 @@ const Configuracion = () => {
         reader.onload = (e) => {
           try {
             const resultado = importarFavoritos(e.target.result);
-            alert(resultado ? 'Favoritos importados correctamente' : 'Error: Formato inválido');
+            alert(
+              resultado
+                ? "Favoritos importados correctamente"
+                : "Error: Formato inválido"
+            );
           } catch (error) {
-            alert('Error al importar favoritos');
+            alert("Error al importar favoritos");
           }
         };
         reader.readAsText(file);
@@ -52,7 +77,7 @@ const Configuracion = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
+    <Box sx={{ p: 3, maxWidth: 800, margin: "0 auto" }}>
       <Typography variant="h4" component="h1" gutterBottom>
         ⚙️ Configuración
       </Typography>
@@ -60,23 +85,26 @@ const Configuracion = () => {
       {/* Sincronización */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>🔄 Sincronización</Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-            <Chip 
-              label={`Estado: ${syncStatus}`} 
-              color={isOnline ? 'success' : 'error'} 
+          <Typography variant="h6" gutterBottom>
+            🔄 Sincronización
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
+            <Chip
+              label={`Estado: ${syncStatus}`}
+              color={isOnline ? "success" : "error"}
             />
-            <Chip 
-              label={`Pestañas activas: ${tabsConnected}`} 
-              color="primary" 
+            <Chip
+              label={`Pestañas activas: ${tabsConnected}`}
+              color="primary"
             />
-            <Chip 
-              label={`Última sync: ${lastSync.toLocaleTimeString()}`} 
-              color="info" 
+            <Chip
+              label={`Última sync: ${lastSync.toLocaleTimeString()}`}
+              color="info"
             />
           </Box>
           <Typography variant="body2" color="text.secondary">
-            Los cambios se sincronizan automáticamente entre todas las pestañas abiertas
+            Los cambios se sincronizan automáticamente entre todas las pestañas
+            abiertas
           </Typography>
         </CardContent>
       </Card>
@@ -84,60 +112,66 @@ const Configuracion = () => {
       {/* Productos y API */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>🛍️ Productos</Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-            <Chip 
-              label={`Total: ${stats.totalProductos}`} 
-              color="primary" 
+          <Typography variant="h6" gutterBottom>
+            🛍️ Productos
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
+            <Chip label={`Total: ${stats.totalProductos}`} color="primary" />
+            <Chip label={`API: ${stats.productosAPI}`} color="info" />
+            <Chip
+              label={`Locales: ${stats.productosLocales}`}
+              color="secondary"
             />
-            <Chip 
-              label={`API: ${stats.productosAPI}`} 
-              color="info" 
-            />
-            <Chip 
-              label={`Locales: ${stats.productosLocales}`} 
-              color="secondary" 
-            />
-            <Chip 
-              label={`Categorías: ${stats.categorias}`} 
-              color="success" 
-            />
+            <Chip label={`Categorías: ${stats.categorias}`} color="success" />
           </Box>
-          
+
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Última actualización API: {stats.lastApiUpdate}
           </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
             <Button
               variant="outlined"
               onClick={async () => {
                 try {
                   await refrescarProductos();
-                  alert('Productos actualizados desde la API');
+                  alert("Productos actualizados desde la API");
                 } catch (error) {
-                  alert('Error al actualizar productos');
+                  alert("Error al actualizar productos");
                 }
               }}
               disabled={loading}
             >
-              {loading ? 'Actualizando...' : 'Actualizar API'}
+              {loading ? "Actualizando..." : "Actualizar API"}
             </Button>
-            
+
             <Button
               variant="outlined"
               color="warning"
               onClick={() => {
-                if (window.confirm('¿Limpiar cache de productos de API?')) {
+                if (window.confirm("¿Limpiar cache de productos de API?")) {
                   limpiarCacheAPI();
-                  alert('Cache limpiado');
+                  alert("Cache limpiado");
                 }
               }}
             >
               Limpiar Cache
             </Button>
+
+            <Button
+              variant="outlined"
+              color="warning"
+              onClick={() => {
+                if (window.confirm("¿Borrar productos locales creados?")) {
+                  eliminarProductosLocales();
+                  alert("Productos borrados correctamente");
+                }
+              }}
+            >
+              Borrar Productos Locales
+            </Button>
           </Box>
-          
+
           {stats.needsUpdate && (
             <Alert severity="warning" sx={{ mt: 2 }}>
               Los productos de API necesitan actualización (más de 30 minutos)
@@ -149,8 +183,10 @@ const Configuracion = () => {
       {/* Sistema */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>📊 Sistema</Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Typography variant="h6" gutterBottom>
+            📊 Sistema
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Chip label="React 18" color="primary" />
             <Chip label="Material UI v5" color="secondary" />
             <Chip label="Context API" color="success" />
@@ -162,12 +198,14 @@ const Configuracion = () => {
       {/* Favoritos */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>💖 Favoritos</Typography>
+          <Typography variant="h6" gutterBottom>
+            💖 Favoritos
+          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Tienes {cantidadFavoritos()} productos favoritos
           </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
             <Button
               startIcon={<Download />}
               variant="outlined"
@@ -176,7 +214,11 @@ const Configuracion = () => {
             >
               Exportar
             </Button>
-            <Button startIcon={<Upload />} variant="outlined" onClick={handleImportar}>
+            <Button
+              startIcon={<Upload />}
+              variant="outlined"
+              onClick={handleImportar}
+            >
               Importar
             </Button>
             <Button
@@ -194,10 +236,18 @@ const Configuracion = () => {
       {/* Interfaz */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>🎨 Interfaz</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <FormControlLabel control={<Switch defaultChecked />} label="Animaciones" />
-            <FormControlLabel control={<Switch defaultChecked />} label="Tema oscuro" />
+          <Typography variant="h6" gutterBottom>
+            🎨 Interfaz
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Animaciones"
+            />
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Tema oscuro"
+            />
             <FormControlLabel control={<Switch />} label="Modo compacto" />
           </Box>
         </CardContent>
