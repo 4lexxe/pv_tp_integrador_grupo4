@@ -1,4 +1,4 @@
-// src/components/layout/Layout.jsx (VERSIÓN CORREGIDA)
+// src/components/layout/Layout.jsx
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
